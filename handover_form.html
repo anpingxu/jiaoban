@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>神经肿瘤外科交班记录</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 12px;
+            padding-bottom: 80px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        
+        .header h1 { font-size: 20px; margin-bottom: 8px; }
+        .header .date { font-size: 14px; opacity: 0.9; }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-title::before {
+            content: "";
+            width: 4px;
+            height: 16px;
+            background: #1890ff;
+            border-radius: 2px;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .summary-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .summary-item .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1890ff;
+        }
+        
+        .summary-item .label { font-size: 12px; color: #666; margin-top: 4px; }
+        
+        .form-group { margin-bottom: 16px; }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background: white;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1890ff;
+        }
+        
+        .form-row {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .patient-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .patient-item .bed-badge {
+            position: absolute;
+            top: -8px;
+            left: 12px;
+            background: #1890ff;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .patient-item .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #ff4d4f;
+            color: white;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .checkbox-item {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .checkbox-item.active {
+            background: #e6f7ff;
+            border-color: #1890ff;
+            color: #1890ff;
+        }
+        
+        .select-item {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f5f5f5;
+        }
+        
+        .select-item.active {
+            background: #1890ff;
+            border-color: #1890ff;
+            color: white;
+        }
+        
+        .add-btn {
+            width: 100%;
+            padding: 14px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            background: transparent;
+            color: #999;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .add-btn:hover {
+            border-color: #1890ff;
+            color: #1890ff;
+        }
+        
+        .submit-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 12px;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 12px;
+        }
+        
+        .submit-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .submit-btn.primary { background: #1890ff; color: white; }
+        
+        .submit-btn.preview {
+            background: #fff;
+            color: #1890ff;
+            border: 1px solid #1890ff;
+        }
+        
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow: auto;
+        }
+        
+        .preview-modal.show { display: block; }
+        
+        .preview-content {
+            background: white;
+            margin: 20px;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+        
+        .preview-header {
+            text-align: center;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .preview-header h2 { font-size: 18px; color: #333; }
+        .preview-header p { color: #999; font-size: 12px; margin-top: 4px; }
+        .preview-section { margin-bottom: 16px; }
+        .preview-section h4 { font-size: 14px; color: #666; margin-bottom: 8px; }
+        
+        .preview-patient {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .preview-patient .bed { font-weight: 600; color: #1890ff; }
+        
+        .preview-highlight {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+        
+        .preview-highlight.warning { background: #fffbe6; color: #faad14; }
+        .preview-highlight.danger { background: #fff2f0; color: #ff4d4f; }
+        .preview-highlight.info { background: #e6f7ff; color: #1890ff; }
+        
+        .close-modal {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: white;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.75);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 2000;
+            display: none;
+        }
+        
+        .toast.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        textarea { min-height: 60px; resize: vertical; }
+        
+        .textarea-row { display: grid; gap: 12px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>吉林大学第一医院</h1>
+        <h2>神经肿瘤外科</h2>
+        <div class="date" id="currentDate"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:4px;">
+            <span id="saveIndicator"></span>
+        </div>
+        <div style="margin-top:12px;display:flex;justify-content:center;align-items:center;gap:8px;">
+            <input type="date" id="datePicker" style="padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:white;font-size:14px;">
+            <button type="button" onclick="confirmDate()" style="padding:8px 16px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:8px;color:white;cursor:pointer;font-size:14px;">确定</button>
+        </div>
+    </div>
+    
+    <form id="handoverForm">
+        <!-- 病区概览 -->
+        <div class="card">
+            <div class="card-title">病区概览</div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="number"><input type="number" name="total_inpatients" value="0" min="0" style="width:60px;text-align:center;background:transparent;border:none;font-size:28px;font-weight:700;color:#1890ff;"></div>
+                    <div class="label">现住院人数</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number"><input type="number" name="new_admissions" value="0" min="0" style="width:60px;text-align:center;background:transparent;border:none;font-size:28px;font-weight:700;color:#52c41a;"></div>
+                    <div class="label">新入院</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number"><input type="number" name="discharges" value="0" min="0" style="width:60px;text-align:center;background:transparent;border:none;font-size:28px;font-weight:700;color:#722ed1;"></div>
+                    <div class="label">出院</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number"><input type="number" name="icu_count" value="0" min="0" style="width:60px;text-align:center;background:transparent;border:none;font-size:28px;font-weight:700;color:#fa8c16;"></div>
+                    <div class="label">NSICU</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 重点关注 -->
+        <div class="card">
+            <div class="card-title">重点关注</div>
+            <div id="patientList"></div>
+            <button type="button" class="add-btn" onclick="addPatient()">+ 添加患者</button>
+        </div>
+        
+        <!-- 值班处置 -->
+        <div class="card">
+            <div class="card-title">值班处置</div>
+            <div id="highlightList"></div>
+            <button type="button" class="add-btn" onclick="addHighlight()">+ 添加处置</button>
+        </div>
+        
+        <!-- 值班医生信息 -->
+        <div class="card">
+            <div class="card-title">值班医生信息</div>
+            <div class="textarea-row">
+                <div class="form-group">
+                    <label>1疗区值班医生</label>
+                    <div class="form-row" style="grid-template-columns: 1fr 1fr;">
+                        <input type="text" name="doctor_1_name" placeholder="姓名">
+                        <input type="text" name="doctor_1_phone" placeholder="电话">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>3疗区值班医生</label>
+                    <div class="form-row" style="grid-template-columns: 1fr 1fr;">
+                        <input type="text" name="doctor_3_name" placeholder="姓名">
+                        <input type="text" name="doctor_3_phone" placeholder="电话">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>4疗区值班医生</label>
+                    <div class="form-row" style="grid-template-columns: 1fr 1fr;">
+                        <input type="text" name="doctor_4_name" placeholder="姓名">
+                        <input type="text" name="doctor_4_phone" placeholder="电话">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>坐班医生</label>
+                    <div class="form-row" style="grid-template-columns: 1fr 1fr;">
+                        <input type="text" name="doctor_zuoban_name" placeholder="姓名">
+                        <input type="text" name="doctor_zuoban_phone" placeholder="电话">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>NSICU值班医生</label>
+                    <div class="form-row" style="grid-template-columns: 1fr 1fr;">
+                        <input type="text" name="doctor_icu_name" placeholder="姓名">
+                        <input type="text" name="doctor_icu_phone" placeholder="电话">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 特殊备注 -->
+        <div class="card">
+            <div class="card-title">特殊备注</div>
+            <div id="specialNoteList"></div>
+            <button type="button" class="add-btn" onclick="addSpecialNote()">+ 添加特殊备注</button>
+        </div>
+    </form>
+    
+    <div class="submit-bar">
+        <button type="button" class="submit-btn preview" onclick="previewReport()">预览</button>
+        <button type="button" class="submit-btn primary" onclick="submitReport()">提交并推送</button>
+    </div>
+    
+    <!-- 预览弹窗 -->
+    <div class="preview-modal" id="previewModal">
+        <button class="close-modal" onclick="closePreview()">×</button>
+        <div class="preview-content">
+            <div class="preview-header">
+                <h2>交班报告预览</h2>
+                <p id="previewDate"></p>
+            </div>
+            <div id="previewContent"></div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <script>
+        const now = new Date();
+        let selectedDate = new Date(now);
+        const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+        function updateDateDisplay() {
+            document.getElementById('currentDate').textContent =
+                `${selectedDate.getFullYear()}年${selectedDate.getMonth()+1}月${selectedDate.getDate()}日 ${weekdays[selectedDate.getDay()]}`;
+        }
+
+        function confirmDate() {
+            const picker = document.getElementById('datePicker');
+            selectedDate = new Date(picker.value + 'T12:00:00');
+            updateDateDisplay();
+            localStorage.setItem('selected_date', picker.value);
+            
+            // 清空当前表单并加载该日期的草稿
+            clearForm();
+            loadDraft();
+        }
+        
+        function clearForm() {
+            // 清空患者列表
+            document.getElementById('patientList').innerHTML = '';
+            document.getElementById('highlightList').innerHTML = '';
+            document.getElementById('specialNoteList').innerHTML = '';
+            patientCount = 0;
+            highlightCount = 0;
+            specialNoteCount = 0;
+            
+            // 重置表单数值（保留日期相关的）
+            document.querySelector('[name="total_inpatients"]').value = 0;
+            document.querySelector('[name="new_admissions"]').value = 0;
+            document.querySelector('[name="discharges"]').value = 0;
+            document.querySelector('[name="icu_count"]').value = 0;
+            
+            // 清空医生信息
+            document.querySelectorAll('input[name^="doctor_"]').forEach(input => input.value = '');
+        }
+
+        // 初始化
+        window.onload = function() {
+            // 设置日期选择器默认值为今天
+            const todayStr = now.toISOString().split('T')[0];
+            document.getElementById('datePicker').value = todayStr;
+            updateDateDisplay();
+
+            // 恢复之前选择的日期
+            const savedDate = localStorage.getItem('selected_date');
+            if (savedDate) {
+                selectedDate = new Date(savedDate + 'T12:00:00');
+                document.getElementById('datePicker').value = savedDate;
+                updateDateDisplay();
+            }
+
+            // 页面加载时检查是否有该日期的草稿
+            loadDraft(true);
+            
+            // 启动自动保存
+            startAutoSave();
+            
+            // 表单输入时实时保存
+            document.getElementById('handoverForm').addEventListener('input', function(e) {
+                clearTimeout(window.inputSaveTimer);
+                window.inputSaveTimer = setTimeout(autoSaveDraft, 2000);
+            });
+        };
+
+        function loadDraft(silent = false) {
+            const draft = localStorage.getItem('handover_draft_' + selectedDate.toISOString().split('T')[0]);
+            if (draft) {
+                if (silent || confirm('检测到该日期有保存的交班记录，是否加载？')) {
+                    const data = JSON.parse(draft);
+                    document.querySelector('[name="total_inpatients"]').value = data.summary.total_inpatients;
+                    document.querySelector('[name="new_admissions"]').value = data.summary.new_admissions;
+                    document.querySelector('[name="discharges"]').value = data.summary.discharges;
+                    document.querySelector('[name="icu_count"]').value = data.summary.icu_count;
+
+                    // 加载医生信息
+                    if (data.doctors) {
+                        if (data.doctors.doctor_1) {
+                            document.querySelector('[name="doctor_1_name"]').value = data.doctors.doctor_1.name || '';
+                            document.querySelector('[name="doctor_1_phone"]').value = data.doctors.doctor_1.phone || '';
+                        }
+                        if (data.doctors.doctor_3) {
+                            document.querySelector('[name="doctor_3_name"]').value = data.doctors.doctor_3.name || '';
+                            document.querySelector('[name="doctor_3_phone"]').value = data.doctors.doctor_3.phone || '';
+                        }
+                        if (data.doctors.doctor_4) {
+                            document.querySelector('[name="doctor_4_name"]').value = data.doctors.doctor_4.name || '';
+                            document.querySelector('[name="doctor_4_phone"]').value = data.doctors.doctor_4.phone || '';
+                        }
+                        if (data.doctors.doctor_zuoban) {
+                            document.querySelector('[name="doctor_zuoban_name"]').value = data.doctors.doctor_zuoban.name || '';
+                            document.querySelector('[name="doctor_zuoban_phone"]').value = data.doctors.doctor_zuoban.phone || '';
+                        }
+                        if (data.doctors.doctor_icu) {
+                            document.querySelector('[name="doctor_icu_name"]').value = data.doctors.doctor_icu.name || '';
+                            document.querySelector('[name="doctor_icu_phone"]').value = data.doctors.doctor_icu.phone || '';
+                        }
+                    }
+
+                    if (data.patients) {
+                        data.patients.forEach(p => addPatient(p.bed_no, p.name, p.phone, p.note, p.ward_type, p.status));
+                    }
+                    if (data.highlights) {
+                        data.highlights.forEach(h => addHighlight(h.professor, h.bed_no, h.name, h.ward_type, h.status, h.symptom, h.treatment));
+                    }
+                    if (data.special_notes) {
+                        data.special_notes.forEach(note => addSpecialNote(note));
+                    }
+                    
+                    // 显示已加载历史记录的提示
+                    if (silent) {
+                        showToast('已加载 ' + data.report_date + ' 的交班记录');
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // 自动保存功能 - 每30秒自动保存草稿
+        let autoSaveTimer;
+        function startAutoSave() {
+            clearInterval(autoSaveTimer);
+            autoSaveTimer = setInterval(() => {
+                autoSaveDraft();
+            }, 30000); // 30秒自动保存
+        }
+        
+        function autoSaveDraft() {
+            const data = getFormData();
+            // 只有有数据时才保存
+            const hasData = data.summary.total_inpatients > 0 || 
+                           data.summary.new_admissions > 0 ||
+                           data.summary.discharges > 0 ||
+                           data.summary.icu_count > 0 ||
+                           data.patients.length > 0 ||
+                           data.highlights.length > 0 ||
+                           data.special_notes.length > 0 ||
+                           data.doctors.doctor_1.name || data.doctors.doctor_1.phone ||
+                           data.doctors.doctor_3.name || data.doctors.doctor_3.phone ||
+                           data.doctors.doctor_4.name || data.doctors.doctor_4.phone ||
+                           data.doctors.doctor_zuoban.name || data.doctors.doctor_zuoban.phone ||
+                           data.doctors.doctor_icu.name || data.doctors.doctor_icu.phone;
+            
+            if (hasData) {
+                localStorage.setItem('handover_draft_' + data.report_date, JSON.stringify(data));
+                // 轻轻显示保存状态（不打扰用户）
+                const saveIndicator = document.getElementById('saveIndicator');
+                if (saveIndicator) {
+                    saveIndicator.textContent = '已保存';
+                    setTimeout(() => { saveIndicator.textContent = ''; }, 2000);
+                }
+            }
+        }
+
+        let patientCount = 0;
+        let highlightCount = 0;
+        let specialNoteCount = 0;
+        
+        const PROFESSORS = ['于莹', '李毅平', '关毅', '马程远', '李蕴潜', '洪新雨', '葛鹏飞', '赵刚', '徐海洋', '于洪泉', '刘心睿', '陈大伟', '徐松柏'];
+        
+        function addPatient(bedNo = '', name = '', phone = '', note = '', wardType = '普通', status = '') {
+            const id = patientCount++;
+            const wardOptions = ['普通', 'NSICU'].map(w => 
+                `<span class="select-item ${wardType===w?'active':''}" onclick="setWardType(this, ${id})">${w}</span>`
+            ).join('');
+            const statusOptions = ['待手术', '术后', '关注检验', '关注检查'].map(s => 
+                `<span class="checkbox-item ${status===s?'active':''}" onclick="togglePatientStatus(this, '${s}', ${id})">${s}</span>`
+            ).join('');
+            
+            const html = `
+                <div class="patient-item" id="patient_${id}">
+                    <div class="bed-badge">床位</div>
+                    <button type="button" class="delete-btn" onclick="deletePatient(${id})">×</button>
+                    <div class="form-row" style="margin-top:8px;">
+                        <input type="text" name="patients[${id}][bed_no]" placeholder="床号" value="${bedNo}" style="padding:8px;">
+                        <input type="text" name="patients[${id}][name]" placeholder="姓名" value="${name}" style="padding:8px;">
+                    </div>
+                    <div class="form-group" style="margin-top:8px;margin-bottom:8px;">
+                        <input type="text" name="patients[${id}][phone]" placeholder="管床医生电话" value="${phone}" style="padding:8px;">
+                    </div>
+                    <div class="form-group" style="margin-bottom:8px;">
+                        <input type="text" name="patients[${id}][note]" placeholder="备注说明：关注点" value="${note}" style="padding:8px;">
+                    </div>
+                    <div style="margin-bottom:8px;">
+                        <span style="font-size:12px;color:#666;margin-right:8px;">病区:</span>
+                        ${wardOptions}
+                    </div>
+                    <div>
+                        <span style="font-size:12px;color:#666;margin-right:8px;">状态:</span>
+                        ${statusOptions}
+                    </div>
+                    <input type="hidden" name="patients[${id}][ward_type]" id="patient_${id}_ward" value="${wardType}">
+                    <input type="hidden" name="patients[${id}][status]" id="patient_${id}_status" value="${status}">
+                </div>
+            `;
+            document.getElementById('patientList').insertAdjacentHTML('beforeend', html);
+        }
+        
+        function deletePatient(id) {
+            document.getElementById(`patient_${id}`).remove();
+        }
+        
+        function setWardType(el, patientId) {
+            const items = el.parentElement.querySelectorAll('.select-item');
+            items.forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById(`patient_${patientId}_ward`).value = el.textContent;
+        }
+        
+        function togglePatientStatus(el, status, patientId) {
+            el.classList.toggle('active');
+            const hidden = document.getElementById(`patient_${patientId}_status`);
+            const active = [];
+            document.querySelectorAll(`#patient_${patientId} .checkbox-item.active`).forEach(item => {
+                active.push(item.textContent);
+            });
+            hidden.value = active.join(',');
+        }
+        
+        function addHighlight(professor = '', bedNo = '', name = '', wardType = '普通', status = '', symptom = '', treatment = '') {
+            const id = highlightCount++;
+            const profOptions = PROFESSORS.map(p => 
+                `<option value="${p}" ${professor===p?'selected':''}>${p}</option>`
+            ).join('');
+            const wardOptions = ['普通', 'NSICU'].map(w => 
+                `<span class="select-item ${wardType===w?'active':''}" onclick="setHighlightWard(this, ${id})">${w}</span>`
+            ).join('');
+            const statusOptions = ['待手术', '术后', '关注检验', '关注检查'].map(s => 
+                `<span class="checkbox-item ${status===s?'active':''}" onclick="toggleHighlightStatus(this, '${s}', ${id})">${s}</span>`
+            ).join('');
+            
+            const html = `
+                <div class="patient-item" id="highlight_${id}" style="background:#fffbe6;">
+                    <div class="bed-badge">带组教授</div>
+                    <button type="button" class="delete-btn" onclick="deleteHighlight(${id})">×</button>
+                    <div class="form-group" style="margin-top:8px;margin-bottom:8px;">
+                        <select name="highlights[${id}][professor]" style="padding:8px;">
+                            <option value="">请选择教授</option>
+                            ${profOptions}
+                        </select>
+                    </div>
+                    <div class="form-row" style="margin-bottom:8px;">
+                        <input type="text" name="highlights[${id}][bed_no]" placeholder="床号" value="${bedNo}" style="padding:8px;">
+                        <input type="text" name="highlights[${id}][name]" placeholder="姓名" value="${name}" style="padding:8px;">
+                    </div>
+                    <div style="margin-bottom:8px;">
+                        <span style="font-size:12px;color:#666;margin-right:8px;">病区:</span>
+                        ${wardOptions}
+                    </div>
+                    <div style="margin-bottom:8px;">
+                        <span style="font-size:12px;color:#666;margin-right:8px;">状态:</span>
+                        ${statusOptions}
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <input type="text" name="highlights[${id}][symptom]" placeholder="症状" value="${symptom}" style="padding:8px;">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <input type="text" name="highlights[${id}][treatment]" placeholder="处置" value="${treatment}" style="padding:8px;">
+                    </div>
+                    <input type="hidden" name="highlights[${id}][ward_type]" id="highlight_${id}_ward" value="${wardType}">
+                    <input type="hidden" name="highlights[${id}][status]" id="highlight_${id}_status" value="${status}">
+                </div>
+            `;
+            document.getElementById('highlightList').insertAdjacentHTML('beforeend', html);
+        }
+        
+        function deleteHighlight(id) {
+            document.getElementById(`highlight_${id}`).remove();
+        }
+
+        function addSpecialNote(text = '') {
+            const id = specialNoteCount++;
+            const html = `
+                <div class="patient-item" id="specialnote_${id}">
+                    <button type="button" class="delete-btn" onclick="deleteSpecialNote(${id})">×</button>
+                    <div class="form-group" style="margin-top:8px;margin-bottom:0;">
+                        <textarea name="special_notes[]" placeholder="请输入特殊备注..." style="padding:8px;min-height:40px;">${text}</textarea>
+                    </div>
+                </div>
+            `;
+            document.getElementById('specialNoteList').insertAdjacentHTML('beforeend', html);
+        }
+
+        function deleteSpecialNote(id) {
+            document.getElementById(`specialnote_${id}`).remove();
+        }
+        
+        function setHighlightWard(el, highlightId) {
+            const items = el.parentElement.querySelectorAll('.select-item');
+            items.forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById(`highlight_${highlightId}_ward`).value = el.textContent;
+        }
+        
+        function toggleHighlightStatus(el, status, highlightId) {
+            el.classList.toggle('active');
+            const hidden = document.getElementById(`highlight_${highlightId}_status`);
+            const active = [];
+            document.querySelectorAll(`#highlight_${highlightId} .checkbox-item.active`).forEach(item => {
+                active.push(item.textContent);
+            });
+            hidden.value = active.join(',');
+        }
+        
+        function getFormData() {
+            const form = document.getElementById('handoverForm');
+            const formData = new FormData(form);
+            const data = {
+                report_date: selectedDate.toISOString().split('T')[0],
+                weekday: weekdays[selectedDate.getDay()],
+                department: '神经肿瘤外科',
+                hospital: '吉林大学第一医院',
+                summary: {
+                    total_inpatients: parseInt(formData.get('total_inpatients')) || 0,
+                    new_admissions: parseInt(formData.get('new_admissions')) || 0,
+                    discharges: parseInt(formData.get('discharges')) || 0,
+                    icu_count: parseInt(formData.get('icu_count')) || 0
+                },
+                patients: [],
+                highlights: [],
+                doctors: {
+                    doctor_1: { name: formData.get('doctor_1_name') || '', phone: formData.get('doctor_1_phone') || '' },
+                    doctor_3: { name: formData.get('doctor_3_name') || '', phone: formData.get('doctor_3_phone') || '' },
+                    doctor_4: { name: formData.get('doctor_4_name') || '', phone: formData.get('doctor_4_phone') || '' },
+                    doctor_zuoban: { name: formData.get('doctor_zuoban_name') || '', phone: formData.get('doctor_zuoban_phone') || '' },
+                    doctor_icu: { name: formData.get('doctor_icu_name') || '', phone: formData.get('doctor_icu_phone') || '' }
+                },
+                special_notes: []
+            };
+
+            // 收集特殊备注
+            const specialNoteInputs = document.querySelectorAll('textarea[name="special_notes[]"]');
+            specialNoteInputs.forEach(input => {
+                if (input.value.trim()) {
+                    data.special_notes.push(input.value.trim());
+                }
+            });
+            
+            for (let i = 0; i < patientCount; i++) {
+                const bedNo = formData.get(`patients[${i}][bed_no]`);
+                if (bedNo) {
+                    data.patients.push({
+                        bed_no: bedNo,
+                        name: formData.get(`patients[${i}][name]`) || '',
+                        phone: formData.get(`patients[${i}][phone]`) || '',
+                        note: formData.get(`patients[${i}][note]`) || '',
+                        ward_type: formData.get(`patients[${i}][ward_type]`) || '普通',
+                        status: formData.get(`patients[${i}][status]`) || ''
+                    });
+                }
+            }
+            
+            for (let i = 0; i < highlightCount; i++) {
+                const professor = formData.get(`highlights[${i}][professor]`);
+                if (professor) {
+                    data.highlights.push({
+                        professor: professor,
+                        bed_no: formData.get(`highlights[${i}][bed_no]`) || '',
+                        name: formData.get(`highlights[${i}][name]`) || '',
+                        ward_type: formData.get(`highlights[${i}][ward_type]`) || '普通',
+                        status: formData.get(`highlights[${i}][status]`) || '',
+                        symptom: formData.get(`highlights[${i}][symptom]`) || '',
+                        treatment: formData.get(`highlights[${i}][treatment]`) || ''
+                    });
+                }
+            }
+            
+            return data;
+        }
+        
+        function previewReport() {
+            const data = getFormData();
+            
+            let patientsHtml = data.patients.map(p => `
+                <div class="preview-patient">
+                    <span class="bed">${p.bed_no}床</span> ${p.name} ${p.phone ? '('+p.phone+')' : ''}
+                    ${p.status ? `<span class="preview-highlight info">${p.status}</span>` : ''}
+                    <span class="preview-highlight ${p.ward_type==='NSICU'?'warning':''}">${p.ward_type}</span>
+                    ${p.note ? `<br><small style="color:#666;">${p.note}</small>` : ''}
+                </div>
+            `).join('');
+            
+            let highlightsHtml = data.highlights.map(h => {
+                let cls = h.status === '待手术' || h.status === '术后' ? 'danger' : 'warning';
+                return `
+                <div class="preview-patient">
+                    <strong>【${h.professor}】</strong>${h.bed_no}床 ${h.name}
+                    ${h.status ? `<span class="preview-highlight ${cls}">${h.status}</span>` : ''}
+                    <span class="preview-highlight ${h.ward_type==='NSICU'?'warning':'info'}">${h.ward_type}</span>
+                    ${h.symptom ? `<br><small style="color:#fa8c16;">症状：${h.symptom}</small>` : ''}
+                    ${h.treatment ? `<br><small style="color:#52c41a;">处置：${h.treatment}</small>` : ''}
+                </div>
+                `;
+            }).join('');
+            
+            document.getElementById('previewDate').textContent = `${data.report_date} ${data.weekday}`;
+            // 医生信息HTML
+            let doctorsHtml = '';
+            const doctorLabels = {
+                doctor_1: '1疗区',
+                doctor_3: '3疗区',
+                doctor_4: '4疗区',
+                doctor_zuoban: '坐班',
+                doctor_icu: 'NSICU'
+            };
+            for (const [key, label] of Object.entries(doctorLabels)) {
+                const d = data.doctors[key];
+                if (d.name || d.phone) {
+                    doctorsHtml += `<span style="margin-right:12px;"><strong>${label}：</strong>${d.name || ''} ${d.phone || ''}</span>`;
+                }
+            }
+
+            // 特殊备注HTML
+            let specialNotesHtml = data.special_notes.map(note =>
+                `<div style="background:#fff7e6;padding:8px;border-radius:4px;margin-bottom:4px;font-size:13px;">${note}</div>`
+            ).join('');
+
+            document.getElementById('previewContent').innerHTML = `
+                <div class="preview-section">
+                    <h4>病区概览</h4>
+                    <div style="display:flex;justify-content:space-around;text-align:center;">
+                        <div><strong>${data.summary.total_inpatients}</strong><br><small>在院</small></div>
+                        <div><strong style="color:#52c41a">+${data.summary.new_admissions}</strong><br><small>新入院</small></div>
+                        <div><strong style="color:#722ed1">-${data.summary.discharges}</strong><br><small>出院</small></div>
+                        <div><strong style="color:#fa8c16">${data.summary.icu_count}</strong><br><small>NSICU</small></div>
+                    </div>
+                </div>
+                <div class="preview-section">
+                    <h4>值班医生</h4>
+                    <div style="font-size:13px;">${doctorsHtml || '<span style="color:#999;">无</span>'}</div>
+                </div>
+                <div class="preview-section">
+                    <h4>重点关注 (${data.patients.length}人)</h4>
+                    ${patientsHtml || '<p style="color:#999;">无</p>'}
+                </div>
+                <div class="preview-section">
+                    <h4>值班处置 (${data.highlights.length}项)</h4>
+                    ${highlightsHtml || '<p style="color:#999;">无</p>'}
+                </div>
+                <div class="preview-section">
+                    <h4>特殊备注 (${data.special_notes.length}条)</h4>
+                    ${specialNotesHtml || '<p style="color:#999;">无</p>'}
+                </div>
+            `;
+            
+            document.getElementById('previewModal').classList.add('show');
+        }
+        
+        function closePreview() {
+            document.getElementById('previewModal').classList.remove('show');
+        }
+        
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+        
+        async function submitReport() {
+            const data = getFormData();
+            
+            try {
+                // 先保存到本地（无论后端是否可用）
+                localStorage.setItem('handover_draft_' + data.report_date, JSON.stringify(data));
+                
+                const API_URL = 'http://localhost:8000/api/handover/submit';
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    showToast('提交成功！数据已备份');
+                    clearForm();
+                } else {
+                    throw new Error('提交失败');
+                }
+            } catch (e) {
+                showToast('已保存到本地（后端未运行）');
+            }
+        }
+    </script>
+</body>
+</html>
